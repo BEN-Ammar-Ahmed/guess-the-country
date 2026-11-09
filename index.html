@@ -49,9 +49,19 @@
           <h1 class="title-bounce">
             <span>Guess</span> <span>the</span> <span>Country!</span>
           </h1>
-          <p class="tagline">Pick a game · 10 questions · get <b>7 right</b> to win a sticker!</p>
+          <p class="tagline" id="tagline">Pick a game · 3 questions · get <b>2 right</b> to win a sticker!</p>
         </div>
       </header>
+
+      <div class="mode-switch" role="group" aria-label="Game mode">
+        <button class="mode-btn active" data-mode="solo">👤 Solo</button>
+        <button class="mode-btn" data-mode="duel">⚔️ 1 vs 1</button>
+      </div>
+      <div class="duel-help">
+        <span class="p1-text"><b>Player 1</b> uses <kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><kbd>F</kbd></span>
+        <span class="vs">VS</span>
+        <span class="p2-text"><b>Player 2</b> uses <kbd>H</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd></span>
+      </div>
 
       <div class="cards">
         <button class="game-card" data-game="flag" style="--d:0">
@@ -95,10 +105,21 @@
       <div class="game-top">
         <button class="back-btn small" data-home title="Quit to main page">← Quit</button>
         <div class="game-name" id="game-name">Guess the Flag</div>
-        <div class="score-pill">Score <b id="score">0</b></div>
+        <div class="score-pill" id="solo-score">Score <b id="score">0</b></div>
+        <div class="duel-scores">
+          <div class="p-pill p1">Player 1: <b id="p1-score">0</b></div>
+          <div class="p-pill p2">Player 2: <b id="p2-score">0</b></div>
+        </div>
       </div>
       <div class="progress"><div class="progress-fill" id="progress-fill"></div></div>
-      <div class="q-count" id="q-count">Question 1 of 10</div>
+      <div class="q-row">
+        <div class="q-count" id="q-count">Question 1 of 3</div>
+        <div class="timer" id="timer">
+          <span class="timer-icon">⏱️</span>
+          <div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div>
+          <span class="timer-num" id="timer-num">15</span>
+        </div>
+      </div>
 
       <div class="question-area" id="question-area"></div>
       <div class="options" id="options"></div>
@@ -111,7 +132,7 @@
       <div class="result-box">
         <div class="result-emoji" id="result-emoji">🎉</div>
         <h1 class="result-title" id="result-title">You won a sticker!</h1>
-        <p class="result-score">You got <b id="result-num">0</b> out of 10</p>
+        <p class="result-score" id="result-score">You got <b id="result-num">0</b> out of 3</p>
         <p class="result-sub" id="result-sub">Show this screen to an ASA member to grab your sticker.</p>
         <button class="big-btn" id="to-join">Continue →</button>
       </div>

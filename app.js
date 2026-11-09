@@ -1,7 +1,12 @@
 // ===== Settings =====
-const QUESTIONS_PER_ROUND = 10;
-const SCORE_TO_WIN = 7;
-const PAUSE_AFTER_ANSWER = 1400; // ms before the next question
+const QUESTIONS_PER_ROUND = 3;
+const SCORE_TO_WIN = 2;            // solo: right answers needed for a sticker
+const SECONDS_PER_QUESTION = 15;
+const PAUSE_AFTER_ANSWER = 1600;   // ms before the next question
+
+// 1 vs 1 keys: Player 1 on the left of the keyboard, Player 2 on the right.
+const P1_KEYS = ["a", "s", "d", "f"];
+const P2_KEYS = ["h", "j", "k", "l"];
 
 const GAME_NAMES = {
   flag: "Guess the Flag",
@@ -201,6 +206,7 @@ function drawMap(container, targetNum) {
 
 // ===== Game flow =====
 let state = null;
+let mode = "solo"; // "solo" or "duel"
 
 function showScreen(name) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
@@ -217,9 +223,18 @@ async function startGame(game) {
     if (!ok) { alert("The map needs internet to load. Please check the connection and try again."); return; }
   }
   const builders = { flag: buildFlagQuestions, fact: buildFactQuestions, map: buildMapQuestions, capital: buildCapitalQuestions };
-  state = { game, questions: builders[game](), index: 0, score: 0, locked: false, timer: null };
+  // In 1 vs 1 we build one extra question, used only as a tie-breaker.
+  const questions = builders[game]().concat(mode === "duel" ? builders[game]().slice(0, 1) : []);
+  state = {
+    game, mode, questions, total: QUESTIONS_PER_ROUND, index: 0,
+    score: 0, p1: 0, p2: 0, out: { 1: false, 2: false },
+    locked: false, timer: null, tick: null, bonus: false,
+  };
   $("#game-name").textContent = GAME_NAMES[game];
   $("#score").textContent = "0";
+  $("#p1-score").textContent = "0";
+  $("#p2-score").textContent = "0";
+  document.body.classList.toggle("duel", mode === "duel");
   showScreen("game");
   showQuestion();
 }
@@ -227,8 +242,12 @@ async function startGame(game) {
 function showQuestion() {
   const q = state.questions[state.index];
   state.locked = false;
-  $("#q-count").textContent = `Question ${state.index + 1} of ${state.questions.length}`;
-  $("#progress-fill").style.width = (state.index / state.questions.length * 100) + "%";
+  state.out = { 1: false, 2: false };
+  document.querySelectorAll(".p-pill").forEach(p => p.classList.remove("locked"));
+  $("#q-count").textContent = state.bonus
+    ? "⚡ Tie-breaker! Bonus question"
+    : `Question ${state.index + 1} of ${state.total}`;
+  $("#progress-fill").style.width = (Math.min(state.index, state.total) / state.total * 100) + "%";
   const fb = $("#feedback");
   fb.textContent = ""; fb.className = "feedback";
 
@@ -240,56 +259,163 @@ function showQuestion() {
     const b = document.createElement("button");
     b.className = "option";
     b.style.setProperty("--i", i);
-    b.innerHTML = `<span class="key">${i + 1}</span>${opt.label}`;
-    b.addEventListener("click", () => answer(i));
+    if (state.mode === "duel") {
+      b.innerHTML = `<span class="key p1">${P1_KEYS[i].toUpperCase()}</span>${opt.label}<span class="key p2">${P2_KEYS[i].toUpperCase()}</span>`;
+    } else {
+      b.innerHTML = `<span class="key">${i + 1}</span>${opt.label}`;
+      b.addEventListener("click", () => answer(i));
+    }
     box.appendChild(b);
   });
+  startTimer();
 }
 
-function answer(i) {
-  if (!state || state.locked) return;
-  state.locked = true;
-  const q = state.questions[state.index];
-  const buttons = [...document.querySelectorAll(".option")];
-  buttons.forEach(b => (b.disabled = true));
-  const fb = $("#feedback");
+// ----- Countdown timer -----
+function startTimer() {
+  stopTimer();
+  const end = Date.now() + SECONDS_PER_QUESTION * 1000;
+  const fill = $("#timer-fill"), num = $("#timer-num"), wrap = $("#timer");
+  wrap.classList.remove("hurry");
+  const update = () => {
+    const left = Math.max(0, end - Date.now());
+    const secs = Math.ceil(left / 1000);
+    fill.style.width = (left / (SECONDS_PER_QUESTION * 1000) * 100) + "%";
+    if (num.textContent !== String(secs)) num.textContent = secs;
+    wrap.classList.toggle("hurry", secs <= 5);
+    if (left <= 0) { stopTimer(); timeUp(); }
+  };
+  update();
+  state.tick = setInterval(update, 100);
+}
+function stopTimer() {
+  if (state && state.tick) { clearInterval(state.tick); state.tick = null; }
+}
 
+function timeUp() {
+  if (!state || state.locked) return;
+  const q = state.questions[state.index];
+  revealCorrect(q);
+  setFeedback(`⏰ Time's up! It was ${q.answerText}.`, "bad");
+  endQuestion();
+}
+
+// ----- Answering -----
+const optionButtons = () => [...document.querySelectorAll(".option")];
+
+function setFeedback(text, kind) {
+  const fb = $("#feedback");
+  fb.textContent = text;
+  fb.className = "feedback " + kind;
+}
+
+function revealCorrect(q) {
+  optionButtons()[q.options.findIndex(o => o.correct)].classList.add("correct");
+}
+
+function bumpPill(el) {
+  el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
+}
+
+function endQuestion() {
+  stopTimer();
+  state.locked = true;
+  optionButtons().forEach(b => {
+    b.disabled = true;
+    if (!b.classList.contains("correct") && !b.classList.contains("wrong")) b.classList.add("dim");
+  });
+  state.timer = setTimeout(nextQuestion, PAUSE_AFTER_ANSWER);
+}
+
+function nextQuestion() {
+  state.index++;
+  if (state.index < state.total) return showQuestion();
+  // 1 vs 1 tie after the normal questions: one bonus question decides it.
+  if (state.mode === "duel" && state.p1 === state.p2 && !state.bonus) {
+    state.bonus = true;
+    state.total++;
+    return showQuestion();
+  }
+  finishGame();
+}
+
+// Solo answer (click or keys 1–4)
+function answer(i) {
+  if (!state || state.locked || state.mode !== "solo") return;
+  const q = state.questions[state.index];
+  const buttons = optionButtons();
   if (q.options[i].correct) {
     state.score++;
     buttons[i].classList.add("correct");
-    fb.textContent = pick(["Correct! 🎉", "Nice one! ✨", "You got it! 🙌", "Yes! 🔥", "Exactly! 👏"]);
-    fb.className = "feedback good";
-    const pill = $(".score-pill");
+    setFeedback(pick(["Correct! 🎉", "Nice one! ✨", "You got it! 🙌", "Yes! 🔥", "Exactly! 👏"]), "good");
     $("#score").textContent = state.score;
-    pill.classList.remove("pop"); void pill.offsetWidth; pill.classList.add("pop");
+    bumpPill($("#solo-score"));
     miniBurst(buttons[i]);
   } else {
     buttons[i].classList.add("wrong");
-    const right = q.options.findIndex(o => o.correct);
-    buttons[right].classList.add("correct");
-    fb.textContent = `Oops! It was ${q.answerText}.`;
-    fb.className = "feedback bad";
+    revealCorrect(q);
+    setFeedback(`Oops! It was ${q.answerText}.`, "bad");
   }
-  buttons.forEach((b, j) => { if (!b.classList.contains("correct") && !b.classList.contains("wrong")) b.classList.add("dim"); });
+  endQuestion();
+}
 
-  state.timer = setTimeout(() => {
-    state.index++;
-    if (state.index < state.questions.length) showQuestion();
-    else finishGame();
-  }, PAUSE_AFTER_ANSWER);
+// 1 vs 1 buzzer answer: first right answer wins; a wrong answer locks you out.
+function duelAnswer(player, i) {
+  if (!state || state.locked || state.mode !== "duel" || state.out[player]) return;
+  const q = state.questions[state.index];
+  const buttons = optionButtons();
+  const other = player === 1 ? 2 : 1;
+  if (q.options[i].correct) {
+    state["p" + player]++;
+    $(`#p${player}-score`).textContent = state["p" + player];
+    bumpPill($(`.p-pill.p${player}`));
+    buttons[i].classList.add("correct", "by-p" + player);
+    setFeedback(`Player ${player} got it! 🎉`, "good p" + player);
+    miniBurst(buttons[i]);
+    endQuestion();
+  } else {
+    state.out[player] = true;
+    buttons[i].classList.remove("wrong"); void buttons[i].offsetWidth;
+    buttons[i].classList.add("wrong");
+    $(`.p-pill.p${player}`).classList.add("locked");
+    if (state.out[other]) {
+      revealCorrect(q);
+      setFeedback(`Nobody got it! It was ${q.answerText}.`, "bad");
+      endQuestion();
+    } else {
+      setFeedback(`❌ Player ${player} is out! Player ${other}, your chance!`, "bad");
+    }
+  }
 }
 
 function finishGame() {
+  stopTimer();
   $("#progress-fill").style.width = "100%";
-  const won = state.score >= SCORE_TO_WIN;
-  $("#result-emoji").textContent = won ? "🎉" : "💪";
-  $("#result-title").textContent = won ? "You won a sticker!" : "So close!";
-  $("#result-sub").textContent = won
-    ? "Show this screen to an ASA member to grab your sticker."
-    : `You needed ${SCORE_TO_WIN} to win. Thanks for playing!`;
-  showScreen("result");
-  countUp($("#result-num"), state.score);
-  if (won) confetti(4200); else confetti(1200, 60);
+  document.querySelectorAll(".p-pill").forEach(p => p.classList.remove("locked"));
+  const score = $("#result-score");
+
+  if (state.mode === "duel") {
+    const { p1, p2 } = state;
+    const winner = p1 > p2 ? 1 : p2 > p1 ? 2 : 0;
+    $("#result-emoji").textContent = winner ? "🏆" : "🤝";
+    $("#result-title").textContent = winner ? `Player ${winner} wins!` : "It's a tie!";
+    score.innerHTML = `<span class="p1-text">Player 1: <b>${p1}</b></span> &nbsp;·&nbsp; <span class="p2-text">Player 2: <b>${p2}</b></span>`;
+    $("#result-sub").textContent = winner
+      ? `Player ${winner}, show this screen to an ASA member to grab your sticker!`
+      : "What a match! Ask an ASA member about stickers.";
+    showScreen("result");
+    confetti(winner ? 4200 : 1500, winner ? 140 : 60);
+  } else {
+    const won = state.score >= SCORE_TO_WIN;
+    $("#result-emoji").textContent = won ? "🎉" : "💪";
+    $("#result-title").textContent = won ? "You won a sticker!" : "So close!";
+    score.innerHTML = `You got <b id="result-num">0</b> out of ${state.total}`;
+    $("#result-sub").textContent = won
+      ? "Show this screen to an ASA member to grab your sticker."
+      : `You needed ${SCORE_TO_WIN} to win. Thanks for playing!`;
+    showScreen("result");
+    countUp($("#result-num"), state.score);
+    if (won) confetti(4200); else confetti(1200, 60);
+  }
   state = null;
   // After a few seconds, move on to the Join ASA page by itself.
   clearTimeout(joinTimer);
@@ -312,6 +438,7 @@ function countUp(el, target) {
 
 function goHome() {
   if (state && state.timer) clearTimeout(state.timer);
+  stopTimer();
   state = null;
   showScreen("home");
 }
@@ -384,10 +511,27 @@ $("#fullscreen-btn").addEventListener("click", () => {
   else document.exitFullscreen?.();
 });
 
-// Keys 1–4 answer questions.
+// Solo / 1 vs 1 switch on the home page
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll(".mode-btn").forEach(b => b.classList.toggle("active", b.dataset.mode === m));
+  document.body.classList.toggle("duel", m === "duel");
+  $("#tagline").innerHTML = m === "duel"
+    ? `Two players, one keyboard · ${QUESTIONS_PER_ROUND} questions · <b>first right answer</b> gets the point!`
+    : `Pick a game · ${QUESTIONS_PER_ROUND} questions · get <b>${SCORE_TO_WIN} right</b> to win a sticker!`;
+}
+document.querySelectorAll(".mode-btn").forEach(b => b.addEventListener("click", () => setMode(b.dataset.mode)));
+setMode("solo");
+
+// Keyboard: solo uses 1–4; 1 vs 1 uses A S D F (Player 1) and H J K L (Player 2).
 addEventListener("keydown", e => {
-  if (state && $("#screen-game").classList.contains("active")) {
-    const n = parseInt(e.key, 10);
+  if (!state || !$("#screen-game").classList.contains("active") || e.repeat) return;
+  const key = e.key.toLowerCase();
+  if (state.mode === "solo") {
+    const n = parseInt(key, 10);
     if (n >= 1 && n <= 4) answer(n - 1);
+  } else {
+    if (P1_KEYS.includes(key)) duelAnswer(1, P1_KEYS.indexOf(key));
+    else if (P2_KEYS.includes(key)) duelAnswer(2, P2_KEYS.indexOf(key));
   }
 });

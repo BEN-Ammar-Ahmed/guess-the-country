@@ -327,3 +327,77 @@ h1, h2 { font-family: "Fredoka", sans-serif; }
 @media (max-width: 900px) {
   .join { grid-template-columns: 1fr; padding-top: 60px; }
 }
+
+/* ---------- Solo / 1 vs 1 ---------- */
+:root { --p1: #e8742a; --p2: #2b6cc4; }
+.p1-text { color: var(--p1); }
+.p2-text { color: var(--p2); }
+
+.mode-switch {
+  display: flex; width: fit-content; margin: -6px auto 14px; padding: 6px; gap: 6px;
+  background: var(--white); border-radius: 999px; box-shadow: var(--shadow);
+  animation: fadeUp .6s .3s backwards;
+}
+.mode-btn {
+  border: 0; background: transparent; color: var(--ink); font-family: "Fredoka", sans-serif;
+  font-weight: 600; font-size: 22px; padding: 10px 30px; border-radius: 999px;
+  transition: background .25s, color .25s, transform .2s;
+}
+.mode-btn:hover { transform: scale(1.05); }
+.mode-btn.active { background: var(--rust); color: var(--cream); }
+.mode-btn[data-mode="duel"].active { background: linear-gradient(90deg, var(--p1), var(--p2)); }
+
+.duel-help {
+  display: none; justify-content: center; align-items: center; gap: 18px;
+  margin: -4px auto 16px; font-size: 19px; font-weight: 700;
+}
+body.duel .duel-help { display: flex; animation: popIn .45s cubic-bezier(.2,.9,.3,1.4) both; }
+.duel-help .vs {
+  font-family: "Fredoka", sans-serif; font-weight: 700; color: var(--cream); background: var(--rust);
+  border-radius: 50%; width: 44px; height: 44px; display: grid; place-items: center;
+  animation: wiggle 1.6s ease-in-out infinite;
+}
+kbd {
+  display: inline-block; min-width: 30px; margin-left: 4px; padding: 2px 7px; border-radius: 7px;
+  background: var(--white); border: 2px solid currentColor; border-bottom-width: 4px;
+  font-family: "Fredoka", sans-serif; font-size: 17px; text-align: center;
+}
+
+/* Scoreboard */
+.duel-scores { display: none; gap: 10px; }
+body.duel .duel-scores { display: flex; }
+body.duel #solo-score { display: none; }
+.p-pill {
+  color: #fff; padding: 8px 18px; border-radius: 999px; font-family: "Fredoka", sans-serif;
+  font-size: 20px; transition: opacity .2s, filter .2s;
+}
+.p-pill b { display: inline-block; min-width: 1ch; }
+.p-pill.p1 { background: var(--p1); }
+.p-pill.p2 { background: var(--p2); }
+.p-pill.pop b { animation: pop .5s; }
+.p-pill.locked { opacity: .4; filter: grayscale(1); }
+
+/* Option keys for both players */
+body.duel .option { padding-right: 62px; cursor: default; }
+.option .key.p1 { background: var(--p1); }
+.option .key.p2 { background: var(--p2); left: auto; right: 16px; }
+.option.correct.by-p1 { border-color: var(--p1); box-shadow: 0 0 0 6px rgba(232,116,42,.3); }
+.option.correct.by-p2 { border-color: var(--p2); box-shadow: 0 0 0 6px rgba(43,108,196,.3); }
+.feedback.good.p1 { color: var(--p1); }
+.feedback.good.p2 { color: var(--p2); }
+
+/* ---------- Timer ---------- */
+.q-row { display: flex; align-items: center; justify-content: center; gap: 22px; }
+.timer { display: flex; align-items: center; gap: 8px; }
+.timer-icon { font-size: 20px; }
+.timer-bar { width: 200px; height: 12px; background: var(--cream-2); border-radius: 999px; overflow: hidden; }
+.timer-fill {
+  height: 100%; width: 100%; background: var(--olive); border-radius: 999px;
+  transition: width .1s linear, background .3s;
+}
+.timer-num {
+  font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 22px; min-width: 2ch; color: var(--olive);
+}
+.timer.hurry .timer-fill { background: var(--red-bad); }
+.timer.hurry .timer-num { color: var(--red-bad); animation: pop .5s infinite; }
+.timer.hurry .timer-icon { animation: shake .5s infinite; }
