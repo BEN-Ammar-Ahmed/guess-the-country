@@ -10,7 +10,7 @@ Double-click `index.html` to open it in Chrome, then click **⛶ Full screen**. 
 2. Pick one of 4 games: Guess the Flag, Fun Fact Match, Find It on the Map, Capital Cities.
 3. Answer 3 random questions. Each one has a 15-second timer.
    - **Solo:** click or press 1–4. Get 2 right to win a sticker.
-   - **1 vs 1:** Player 1 presses A S D F, Player 2 presses H J K L. The first right answer gets the point; a wrong answer locks you out of that question. A tie goes to a bonus question.
+   - **1 vs 1:** players take turns, one question each, back and forth (3 each). Most right answers wins. A tie gives each player one bonus question.
 4. The Join ASA page with the QR codes shows next.
 
 ## Files
@@ -23,4 +23,4 @@ Double-click `index.html` to open it in Chrome, then click **⛶ Full screen**. 
 
 ## Settings
 
-At the top of `app.js`: `QUESTIONS_PER_ROUND` (3), `SCORE_TO_WIN` (2), `SECONDS_PER_QUESTION` (15), and the 1 vs 1 keys.
+At the top of `app.js`: `QUESTIONS_PER_ROUND` (3), `SCORE_TO_WIN` (2) and `SECONDS_PER_QUESTION` (15).
