@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guess the Country · ASA at FGCU</title>
+  <link rel="icon" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Decorations that stay on every screen -->
+  <div class="border-pattern left" aria-hidden="true"></div>
+  <div class="border-pattern right" aria-hidden="true"></div>
+  <svg class="palm left" viewBox="0 0 200 200" aria-hidden="true"><use href="#palm-leaf"/></svg>
+  <svg class="palm right" viewBox="0 0 200 200" aria-hidden="true"><use href="#palm-leaf"/></svg>
+  <div class="blob b1" aria-hidden="true"></div>
+  <div class="blob b2" aria-hidden="true"></div>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <g id="palm-leaf">
+        <path d="M10 10 C 70 40, 130 90, 190 180" stroke="#4d5b2c" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <g fill="#5d6e34">
+          <path d="M30 22 C 20 50, 10 70, 2 90 C 25 70, 40 50, 42 30Z"/>
+          <path d="M48 32 C 40 65, 30 90, 22 112 C 48 90, 60 62, 60 40Z"/>
+          <path d="M66 44 C 62 78, 56 104, 50 130 C 76 104, 82 76, 78 54Z"/>
+          <path d="M84 58 C 84 92, 82 120, 80 146 C 102 118, 104 88, 96 68Z"/>
+          <path d="M102 74 C 106 106, 108 134, 110 160 C 128 130, 124 100, 114 84Z"/>
+          <path d="M40 22 C 70 14, 95 10, 120 4 C 100 24, 75 32, 52 34Z"/>
+          <path d="M58 34 C 92 32, 118 30, 146 28 C 124 46, 96 50, 70 46Z"/>
+          <path d="M76 48 C 108 52, 134 56, 160 62 C 136 76, 108 74, 88 62Z"/>
+          <path d="M94 64 C 124 74, 148 84, 172 96 C 146 106, 122 98, 106 80Z"/>
+        </g>
+      </g>
+    </defs>
+  </svg>
+
+  <main id="app">
+
+    <!-- HOME -->
+    <section id="screen-home" class="screen active">
+      <header class="home-header">
+        <img class="logo spin-in" src="assets/logo.png" alt="African Student Association at FGCU logo">
+        <div class="home-titles">
+          <p class="kicker">African Students Association at FGCU</p>
+          <h1 class="title-bounce">
+            <span>Guess</span> <span>the</span> <span>Country!</span>
+          </h1>
+          <p class="tagline">Pick a game · 10 questions · get <b>7 right</b> to win a sticker!</p>
+        </div>
+      </header>
+
+      <div class="cards">
+        <button class="game-card" data-game="flag" style="--d:0">
+          <div class="card-art flag-art">
+            <img src="https://flagcdn.com/w160/gh.png" alt="">
+            <img src="https://flagcdn.com/w160/ng.png" alt="">
+            <img src="https://flagcdn.com/w160/za.png" alt="">
+          </div>
+          <h2>Guess the Flag</h2>
+          <p>See a flag, name the country. Watch out for look-alikes!</p>
+          <span class="play">Play ▶</span>
+        </button>
+
+        <button class="game-card" data-game="fact" style="--d:1">
+          <div class="card-art emoji-art">💡</div>
+          <h2>Fun Fact Match</h2>
+          <p>Read a wild fact and guess which country it's about.</p>
+          <span class="play">Play ▶</span>
+        </button>
+
+        <button class="game-card" data-game="map" style="--d:2">
+          <div class="card-art emoji-art">🗺️</div>
+          <h2>Find It on the Map</h2>
+          <p>A country lights up on the map. Do you know which one?</p>
+          <span class="play">Play ▶</span>
+        </button>
+
+        <button class="game-card" data-game="capital" style="--d:3">
+          <div class="card-art emoji-art">🏛️</div>
+          <h2>Capital Cities</h2>
+          <p>Match countries and capitals. It's trickier than you think!</p>
+          <span class="play">Play ▶</span>
+        </button>
+      </div>
+
+      <button id="fullscreen-btn" class="corner-btn" title="Full screen">⛶ Full screen</button>
+    </section>
+
+    <!-- GAME -->
+    <section id="screen-game" class="screen">
+      <div class="game-top">
+        <button class="back-btn small" data-home title="Quit to main page">← Quit</button>
+        <div class="game-name" id="game-name">Guess the Flag</div>
+        <div class="score-pill">Score <b id="score">0</b></div>
+      </div>
+      <div class="progress"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="q-count" id="q-count">Question 1 of 10</div>
+
+      <div class="question-area" id="question-area"></div>
+      <div class="options" id="options"></div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+    </section>
+
+    <!-- RESULT -->
+    <section id="screen-result" class="screen">
+      <button class="back-btn" data-home title="Back to main page">← Main page</button>
+      <div class="result-box">
+        <div class="result-emoji" id="result-emoji">🎉</div>
+        <h1 class="result-title" id="result-title">You won a sticker!</h1>
+        <p class="result-score">You got <b id="result-num">0</b> out of 10</p>
+        <p class="result-sub" id="result-sub">Show this screen to an ASA member to grab your sticker.</p>
+        <button class="big-btn" id="to-join">Continue →</button>
+      </div>
+    </section>
+
+    <!-- JOIN ASA -->
+    <section id="screen-join" class="screen">
+      <button class="back-btn" data-home title="Back to main page">← Main page</button>
+      <div class="join">
+        <div class="join-left">
+          <p class="kicker">African Students Association at FGCU</p>
+          <img class="join-logo" src="assets/logo.png" alt="ASA logo">
+          <h1 class="join-title"><span class="burst">JOIN ASA!</span></h1>
+          <div class="brush tagline-brush">Celebrate • Connect • Learn • Belong</div>
+          <p class="join-text">A student organization at FGCU that celebrates African cultures, builds community, and creates opportunities for cultural, social, and educational events.</p>
+          <div class="brush welcome-brush">Everyone is Welcome!</div>
+        </div>
+        <div class="join-right">
+        <p class="scan-me">📱 Scan with your phone!</p>
+        <div class="qr-row">
+          <figure class="qr">
+            <img src="assets/qr-eaglelink.png" alt="QR code to join ASA on Eagle Link">
+            <figcaption>Join us on<br>Eagle Link!</figcaption>
+          </figure>
+          <figure class="qr">
+            <img src="assets/qr-instagram.png" alt="QR code to follow ASA on Instagram">
+            <figcaption>Follow us on<br>Instagram!</figcaption>
+          </figure>
+        </div>
+        <button class="big-btn" data-home>Play another game ↺</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <!-- Map tools (need internet) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
