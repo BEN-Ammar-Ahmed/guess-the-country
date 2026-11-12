@@ -1,6 +1,7 @@
 // ===== Settings =====
-const QUESTIONS_PER_ROUND = 3;
-const SCORE_TO_WIN = 2;            // solo: right answers needed for a sticker
+const QUESTIONS_PER_ROUND = 10;      // solo questions per game
+const DUEL_QUESTIONS_EACH = 5;       // 1 vs 1: questions per player (10 total)
+const SCORE_TO_WIN = 7;            // solo: right answers needed for a sticker
 const SECONDS_PER_QUESTION = 15;
 const PAUSE_AFTER_ANSWER = 1600;   // ms before the next question
 
@@ -219,12 +220,12 @@ async function startGame(game) {
     if (!ok) { alert("The map needs internet to load. Please check the connection and try again."); return; }
   }
   const builders = { flag: buildFlagQuestions, fact: buildFactQuestions, map: buildMapQuestions, capital: buildCapitalQuestions };
-  // 1 vs 1: players take turns, so each gets QUESTIONS_PER_ROUND questions,
+  // 1 vs 1: players take turns, so each gets DUEL_QUESTIONS_EACH questions,
   // plus one extra each saved for a tie-breaker.
   const duel = mode === "duel";
-  const questions = builders[game](duel ? QUESTIONS_PER_ROUND * 2 + 2 : QUESTIONS_PER_ROUND);
+  const questions = builders[game](duel ? DUEL_QUESTIONS_EACH * 2 + 2 : QUESTIONS_PER_ROUND);
   state = {
-    game, mode, questions, total: duel ? QUESTIONS_PER_ROUND * 2 : QUESTIONS_PER_ROUND, index: 0,
+    game, mode, questions, total: duel ? DUEL_QUESTIONS_EACH * 2 : QUESTIONS_PER_ROUND, index: 0,
     score: 0, p1: 0, p2: 0, player: 1,
     locked: false, timer: null, tick: null, bonus: false,
   };
@@ -248,7 +249,7 @@ function showQuestion() {
     const round = Math.floor(state.index / 2) + 1;
     $("#q-count").innerHTML = state.bonus
       ? `⚡ Tie-breaker! · <span class="p${p}-text">Player ${p}'s turn</span>`
-      : `Round ${round} of ${QUESTIONS_PER_ROUND} · <span class="p${p}-text">Player ${p}'s turn</span>`;
+      : `Round ${round} of ${DUEL_QUESTIONS_EACH} · <span class="p${p}-text">Player ${p}'s turn</span>`;
     document.body.dataset.turn = p;
     document.querySelectorAll(".p-pill").forEach(el => el.classList.toggle("turn", el.classList.contains("p" + p)));
   } else {
@@ -517,7 +518,7 @@ function setMode(m) {
   document.querySelectorAll(".mode-btn").forEach(b => b.classList.toggle("active", b.dataset.mode === m));
   document.body.classList.toggle("duel", m === "duel");
   $("#tagline").innerHTML = m === "duel"
-    ? `Two players take turns · ${QUESTIONS_PER_ROUND} questions each · <b>most right answers</b> wins!`
+    ? `Two players take turns · ${DUEL_QUESTIONS_EACH} questions each · <b>most right answers</b> wins!`
     : `Pick a game · ${QUESTIONS_PER_ROUND} questions · get <b>${SCORE_TO_WIN} right</b> to win a sticker!`;
 }
 document.querySelectorAll(".mode-btn").forEach(b => b.addEventListener("click", () => setMode(b.dataset.mode)));
