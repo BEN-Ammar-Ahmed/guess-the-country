@@ -430,3 +430,50 @@ body.duel[data-turn="2"] .option:hover:not(:disabled) { border-color: var(--p2);
   80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); }
 }
+
+/* ---------- 6 game cards: 3 per row, a bit more compact ---------- */
+.cards { grid-template-columns: repeat(3, 1fr); gap: 18px; max-width: 1100px; }
+.game-card { padding: 14px 16px 16px; flex-direction: row; text-align: left; gap: 14px; align-items: center; }
+.game-card .card-art { height: auto; flex: 0 0 96px; }
+.game-card .emoji-art { font-size: 58px; }
+.game-card .card-text { display: flex; flex-direction: column; align-items: flex-start; }
+.game-card h2 { margin: 0 0 4px; font-size: 22px; }
+.game-card p { margin: 0 0 10px; font-size: 15px; }
+.game-card .play { font-size: 16px; padding: 6px 18px; }
+.flag-art { width: 96px; height: 80px; }
+.flag-art img { width: 64px; }
+.flag-art img:nth-child(1) { transform: rotate(-14deg) translate(-14px, 14px); }
+.flag-art img:nth-child(2) { transform: translate(16px, 6px); }
+.flag-art img:nth-child(3) { transform: rotate(14deg) translate(30px, 24px); }
+
+/* ---------- Guess the Dish ---------- */
+.dish-card {
+  margin: 0; background: var(--white); border-radius: var(--radius); padding: 10px 10px 8px;
+  box-shadow: var(--shadow); max-width: 520px; animation: popIn .6s cubic-bezier(.2,.9,.3,1.3) both;
+}
+.dish-card img { display: block; width: 100%; height: 240px; object-fit: cover; border-radius: 14px; }
+.dish-card figcaption { display: flex; flex-direction: column; padding: 8px 4px 0; }
+.dish-card figcaption b { font-family: "Fredoka", sans-serif; font-size: 26px; color: var(--rust); }
+.dish-card figcaption span { font-size: 17px; font-weight: 700; }
+.dish-card .credit { display: block; font-size: 11px; opacity: .55; margin-top: 4px; }
+
+/* ---------- Language Match ---------- */
+.phrase-card { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 10px 0; }
+.phrase-card .bubble {
+  position: relative; font-family: "Fredoka", sans-serif; font-weight: 700; font-size: clamp(48px, 7vw, 84px);
+  color: var(--white); background: var(--rust); padding: 18px 48px; border-radius: 40px;
+  box-shadow: var(--shadow); animation: popIn .6s cubic-bezier(.2,.9,.3,1.5) both;
+}
+.phrase-card .bubble::after {
+  content: ""; position: absolute; left: 60px; bottom: -22px; border: 14px solid transparent;
+  border-top: 14px solid var(--rust); border-left: 14px solid var(--rust);
+}
+.phrase-card .meaning { font-size: 26px; font-weight: 800; margin-top: 18px; animation: fadeUp .5s .3s both; }
+.feedback .note { display: block; font-family: "Nunito", sans-serif; font-size: 19px; color: var(--ink); margin-top: 4px; }
+
+@media (max-width: 1100px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px) { .cards { grid-template-columns: 1fr; } }
+.option .lang-country {
+  display: inline-block; margin-right: 10px; padding: 2px 10px; border-radius: 999px;
+  background: var(--cream-2); color: var(--rust-dark); font-size: 15px; font-weight: 800; vertical-align: middle;
+}

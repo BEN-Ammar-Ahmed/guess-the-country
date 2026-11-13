@@ -10,6 +10,8 @@ const GAME_NAMES = {
   fact: "Fun Fact Match",
   map: "Find It on the Map",
   capital: "Capital Cities",
+  dish: "Guess the Dish",
+  lang: "Language Match",
 };
 
 const byCode = Object.fromEntries(COUNTRIES.map(c => [c.code, c]));
@@ -171,6 +173,49 @@ function buildMapQuestions(n = QUESTIONS_PER_ROUND) {
   });
 }
 
+function buildDishQuestions(n = QUESTIONS_PER_ROUND) {
+  return pickFresh("dish", DISHES, d => d.name, n).map(d => {
+    const c = byCode[d.code];
+    // Wrong answers never include countries that share the dish.
+    const blocked = new Set([d.code, ...d.avoid]);
+    const wrong = shuffle(COUNTRIES.filter(o => !blocked.has(o.code))).slice(0, 3);
+    return {
+      render(area) {
+        area.innerHTML = `<p class="prompt">Which country is this dish from?</p>
+          <figure class="dish-card">
+            <img src="${d.img}" alt="${d.name}">
+            <figcaption><b>${d.name}</b><span>${d.about}</span></figcaption>
+            <small class="credit">${d.credit}</small>
+          </figure>`;
+      },
+      options: shuffle([{ label: c.name, correct: true }, ...wrong.map(w => ({ label: w.name, correct: false }))]),
+      answerText: c.name,
+    };
+  });
+}
+
+// Answer button text: country in front, then the language.
+const langLabel = l => `<span class="lang-country">${LANG_COUNTRY[l]}</span>${l}`;
+
+function buildLangQuestions(n = QUESTIONS_PER_ROUND) {
+  const allLangs = Object.keys(LANGUAGES);
+  return pickFresh("lang", PHRASES, p => p.phrase, n).map(p => {
+    const wrong = shuffle(allLangs.filter(l => l !== p.lang)).slice(0, 3);
+    return {
+      render(area) {
+        area.innerHTML = `<p class="prompt">Which language is this?</p>
+          <div class="phrase-card">
+            <span class="bubble">${p.phrase}</span>
+            <span class="meaning">means “${p.meaning}”</span>
+          </div>`;
+      },
+      options: shuffle([{ label: langLabel(p.lang), correct: true }, ...wrong.map(l => ({ label: langLabel(l), correct: false }))]),
+      answerText: p.lang,
+      note: `${p.lang} is spoken in ${LANGUAGES[p.lang]}.`,
+    };
+  });
+}
+
 function drawMap(container, targetNum) {
   const width = 520, height = 480;
   const svg = d3.select(container).append("svg").attr("viewBox", `0 0 ${width} ${height}`);
@@ -219,7 +264,10 @@ async function startGame(game) {
     const ok = await mapReady;
     if (!ok) { alert("The map needs internet to load. Please check the connection and try again."); return; }
   }
-  const builders = { flag: buildFlagQuestions, fact: buildFactQuestions, map: buildMapQuestions, capital: buildCapitalQuestions };
+  const builders = {
+    flag: buildFlagQuestions, fact: buildFactQuestions, map: buildMapQuestions,
+    capital: buildCapitalQuestions, dish: buildDishQuestions, lang: buildLangQuestions,
+  };
   // 1 vs 1: players take turns, so each gets DUEL_QUESTIONS_EACH questions,
   // plus one extra each saved for a tie-breaker.
   const duel = mode === "duel";
@@ -340,6 +388,9 @@ function bumpPill(el) {
 function endQuestion() {
   stopTimer();
   state.locked = true;
+  // Extra info after answering (e.g. where a language is spoken).
+  const note = state.questions[state.index].note;
+  if (note) $("#feedback").innerHTML += `<span class="note">${note}</span>`;
   optionButtons().forEach(b => {
     b.disabled = true;
     if (!b.classList.contains("correct") && !b.classList.contains("wrong")) b.classList.add("dim");

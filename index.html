@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
   <!-- Decorations that stay on every screen -->
@@ -71,30 +71,44 @@
             <img src="https://flagcdn.com/w160/ng.png" alt="">
             <img src="https://flagcdn.com/w160/za.png" alt="">
           </div>
-          <h2>Guess the Flag</h2>
+          <div class="card-text"><h2>Guess the Flag</h2>
           <p>See a flag, name the country. Watch out for look-alikes!</p>
-          <span class="play">Play ▶</span>
+          <span class="play">Play ▶</span></div>
         </button>
 
         <button class="game-card" data-game="fact" style="--d:1">
           <div class="card-art emoji-art">💡</div>
-          <h2>Fun Fact Match</h2>
+          <div class="card-text"><h2>Fun Fact Match</h2>
           <p>Read a wild fact and guess which country it's about.</p>
-          <span class="play">Play ▶</span>
+          <span class="play">Play ▶</span></div>
         </button>
 
         <button class="game-card" data-game="map" style="--d:2">
           <div class="card-art emoji-art">🗺️</div>
-          <h2>Find It on the Map</h2>
+          <div class="card-text"><h2>Find It on the Map</h2>
           <p>A country lights up on the map. Do you know which one?</p>
-          <span class="play">Play ▶</span>
+          <span class="play">Play ▶</span></div>
         </button>
 
         <button class="game-card" data-game="capital" style="--d:3">
           <div class="card-art emoji-art">🏛️</div>
-          <h2>Capital Cities</h2>
+          <div class="card-text"><h2>Capital Cities</h2>
           <p>Match countries and capitals. It's trickier than you think!</p>
-          <span class="play">Play ▶</span>
+          <span class="play">Play ▶</span></div>
+        </button>
+
+        <button class="game-card" data-game="dish" style="--d:4">
+          <div class="card-art emoji-art">🍲</div>
+          <div class="card-text"><h2>Guess the Dish</h2>
+          <p>See a famous dish and guess which country it comes from. Yum!</p>
+          <span class="play">Play ▶</span></div>
+        </button>
+
+        <button class="game-card" data-game="lang" style="--d:5">
+          <div class="card-art emoji-art">🗣️</div>
+          <div class="card-text"><h2>Language Match</h2>
+          <p>"Jambo!" "Sawubona!" Which African language is it?</p>
+          <span class="play">Play ▶</span></div>
         </button>
       </div>
 
@@ -175,7 +189,7 @@
   <!-- Map tools (need internet) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
-  <script src="data.js"></script>
-  <script src="app.js"></script>
+  <script src="data.js?v=6"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>
